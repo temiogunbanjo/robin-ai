@@ -127,7 +127,7 @@ class RobinBackgroundService:
             title='Robin has stopped listening',
             message="An error occurred while listening in the background and listener has been paused. "
                     "Tap the mic button to restart background listener",
-            app_name='Robin Virtual Assistant', app_icon='', timeout=3600,
+            app_name='Robin Virtual Assistant', app_icon='resources/images/Robin.ico', timeout=3600,
             toast=True
         )
         self.should_exit = True
@@ -170,7 +170,7 @@ class RobinBackgroundService:
                     message_index = random.randint(0, len(self.__idleness_reminders) - 1)
                     notification.notify(
                         title='Robin Reminder', message=self.__idleness_reminders[message_index],
-                        app_name='Robin Virtual Assistant', app_icon='', timeout=40
+                        app_name='Robin Virtual Assistant', app_icon='resources/images/Robin.ico', timeout=40
                     )
                     self.robin.talk(self.__idleness_reminders[message_index])
                 self.idleness_count = 0
