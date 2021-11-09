@@ -1,0 +1,50 @@
+# define variables
+# #:set s dp(100)
+
+<Preloader>:
+    name: "preloader"
+    orientation: "vertical"
+
+    # Background overlay
+    canvas.before:
+        Color:
+            rgba: 23/255, 23/255, 23/255, 1
+        Rectangle:
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        #height: "72dp"
+        size_hint: 0.6, 0.2
+        pos_hint: {"center_x": 0.5, "center_y": 0.55}
+        spacing: "35dp"
+
+        Image:
+            source: "resources/images/Robin.png"
+            size: "128dp", "128dp"
+            size_hint: None, None
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+        Label:
+            text: "Robin Virtual Assistant"
+            color: 1, 1, 1, 1
+            font_size: "31dp"
+            font_name: "Poppins-Bold"
+            size: self.texture_size
+            size_hint: None, None
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+
+    ProgressBar:
+        max: 100
+        value: root.progress_value
+        size_hint_x: 0.25
+        pos_hint: {"center_x": 0.5, "center_y": 0.315}
+
+    Label:
+        text: root.progress_message
+        color: 1, 1, 1, 1
+        font_size: "11dp"
+        font_name: "Poppins"
+        size_hint: 0.7, 0.2
+        pos_hint: {"center_x": 0.5, "center_y": 0.28}

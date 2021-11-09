@@ -1,0 +1,187 @@
+## garden install kivy icons
+#:import ceil math.ceil
+#:import hex kivy.utils.get_color_from_hex
+
+<HomeLayout>:
+    name: "home"
+    orientation: "vertical"
+    padding: (0, 0)
+    spacing: "20dp"
+
+    # black background
+    canvas.before:
+        Color:
+            rgba: 23/255, 23/255, 23/255, 1
+        Rectangle:
+            size: self.size
+
+    FitImage:
+        id: bg_image
+        source: "resources/images/AI-bg-1.png"
+        size_hint_y: 1.1
+        pos_hint: {"center_y": 0.5}
+        opacity: 0.025
+
+<NavigationBar>:
+    height: "55dp"
+    size_hint_y: None
+    background_color: (76/255, 175/255, 80/255, 1)
+    background_image: "resources/bg-white.png"
+    font_name: "Poppins-Medium"
+
+    ActionView:
+        ActionPrevious:
+            with_previous: False
+            font_name: "Poppins-Medium"
+            title: "Robin AI"
+            app_icon: ""
+            padding: ("15dp", "0dp")
+
+        ActionButton:
+            background_color: (10, 10, 10, 0.08)
+            text: "Menu"
+            font_name: "Poppins"
+            width: "100dp"
+            size_hint: None, 1
+            on_release:
+                app.root.transition.direction = 'left'
+                app.root.current = "settings"
+
+<StackLayout1>:
+    size_hint: 0.6, 1
+    orientation: 'lr-tb'
+    padding: ("30dp", "0dp")
+    Label:
+        text: "Robin AI"
+        font_name: "Poppins-Medium"
+        size: self.texture_size
+        size_hint: None, 1
+
+
+<Body>:
+    orientation: "vertical"
+    spacing: "30dp"
+    padding: ("25dp", "25dp")
+    size_hint_x: 0.9
+    pos_hint: {"center_x": 0.5}
+
+<ResponseDisplay>:
+    size_hint_x: 1
+    pos_hint: {"center_x": 0.5}
+
+    canvas.before:
+        Color:
+            rgba: 30/255, 104/255, 1, 0
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [20]
+
+    Label:
+        id: response_label
+        pos_hint: {"left": 0}
+        markup: True
+        padding: ("0", "25dp")
+        halign: "center"
+        valign: "top"
+        font_name: "Poppins-Medium"
+        font_size: f"{ceil(12.5 + (0.05 * self.width))}dp"
+        #font_style: "H6"
+        #theme_text_color: "Custom"
+        text_color: 1, 1, 1, 1,
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+
+<AudioVisualizer>:
+    height: "25dp"
+    size_hint: 0.5, None
+    pos_hint: {"center_x": 0.5}
+
+    canvas.after:
+        Color:
+            rgba: 150/255, 144/255, 1, 0.05
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [12.5]
+
+<InputSectionLayout>:
+    orientation: "horizontal"
+    size_hint_x: 0.7
+    size_hint_y: None
+    pos_hint: {"center_x": 0.5, 'y': 0}
+    spacing: "-23dp"
+
+    #canvas.before:
+    #    Color:
+    #        rgba: 224/255, 224/255, 224/255, 1
+    #    RoundedRectangle:
+    #        size: self.size
+    #        pos: self.x, self.y + (self.height / 2)
+    #        radius: [self.height / 2]
+
+    AppTextField:
+        id: command_input
+        normal_color: [224/255, 224/255, 224/255, 1]
+        line_color: [67/255, 160/255, 71/255, 1]
+
+        multiline: False
+        size_hint: 1, 1
+        hint_text: "Ask something..."
+        icon_left: "keyboard"
+        pos_hint: {"center_x": 0.5, "y": 0.5}
+
+    MDIconButton:
+        id: post_button
+        icon: "send"
+        #md_bg_color: 67/255, 160/255, 71/255, 1
+        user_font_size: "24sp"
+        size: "45dp", "45dp"
+        size_hint: (None, None)
+        pos_hint: {"center_x": 0.5, "y": 0.5}
+
+<RoundedButton>:
+    canvas_bg_color: 67/255, 160/255, 71/255, 1
+    background_color: (0, 0, 0, 0)
+    canvas.before:
+        Color:
+            rgba: self.canvas_bg_color
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [50]
+
+<RoundedToggleButton>:
+    canvas_bg_color: 139/255, 195/255, 75/255, 1
+    background_color: (0, 0, 0, 0)
+    canvas.before:
+        Color:
+            rgba: self.canvas_bg_color
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [self.width/2]
+
+<MicButton>:
+    elevation: 10
+
+    # Custom params for down and normal button colors
+    up_state_color: 139/255, 195/255, 75/255, 1
+    down_state_color: 51/255, 105/255, 30/255, 1
+
+    # Custom params for listening circle
+    size_increase_factor: 0
+    animated_color: (144/255, 164/255, 174/255, 0)
+    animated_circle_x: self.x - ((self.width * self.size_increase_factor)/2)
+    animated_circle_y: self.y - ((self.height * self.size_increase_factor)/2)
+    animated_circle_width: self.width * (1 + self.size_increase_factor)
+    animated_circle_height: self.height * (1 + self.size_increase_factor)
+    animated_circle_radius: (self.height * (1 + self.size_increase_factor))/2
+
+    canvas.before:
+        Color:
+            rgba: self.animated_color
+        Line:
+            width: 6
+            rounded_rectangle: self.animated_circle_x, self.animated_circle_y, self.animated_circle_width, self.animated_circle_height, self.animated_circle_radius

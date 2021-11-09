@@ -1,0 +1,108 @@
+[
+  {
+    "name": "Adobe Photoshop",
+    "alias": [
+      "ps",
+      "adobe ps",
+      "adobe photoshop",
+      "photoshop"
+    ],
+    "location": "",
+    "scripts": {
+      "open": "start photoshop.exe",
+      "close": "taskkill /F /IM photoshop.exe /T"
+    }
+  },
+  {
+    "name": "Internet Explorer",
+    "alias": [
+      "internet explorer",
+      "ie",
+      "ie browser",
+      "explorer"
+    ],
+    "location": "C:\\Program Files\\Internet Explorer",
+    "scripts": {
+      "open": "start iexplore.exe",
+      "close": "taskkill /F /IM iexplore.exe /T"
+    }
+  },
+  {
+    "name": "Command Prompt",
+    "alias": [
+      "command prompt",
+      "cmd",
+      "command line",
+      "terminal"
+    ],
+    "location": "C:\\Program Files\\cmd.exe",
+    "scripts": {
+      "open": "cd C:\\Users && deactivate && start cmd.exe",
+      "close": "taskkill /F /IM cmd.exe /T"
+    }
+  },
+  {
+    "name": "Microsoft Edge",
+    "alias": [
+      "microsoft edge",
+      "msedge",
+      "ms edge",
+      "edge"
+    ],
+    "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application",
+    "scripts": {
+      "open": "start msedge.exe",
+      "close": "taskkill /F /IM msedge.exe /T"
+    }
+  },
+  {
+    "name": "Google Chrome",
+    "alias": [
+      "chrome browser",
+      "chrome",
+      "google chrome"
+    ],
+    "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application",
+    "scripts": {
+      "open": "start chrome.exe",
+      "close": "taskkill /F /IM chrome.exe /T"
+    }
+  },
+  {
+    "name": "VLC Media Player",
+    "alias": [
+      "vlc",
+      "vlc player",
+      "vlc app"
+    ],
+    "location": "C:/Program Files/VideoLAN/VLC/vlc.exe",
+    "scripts": {
+      "open": "cd \"C:/Program Files/VideoLAN/VLC\" && start vlc.exe",
+      "close": "cd \"C:/Program Files/VideoLAN/VLC\" && taskkill /F /IM \"vlc.exe\" /T"
+    }
+  },
+  {
+    "name": "My Workspace",
+    "alias": [
+      "my workspace",
+      "workspace"
+    ],
+    "location": "",
+    "scripts": {
+      "open": "cd \"C:\\Users\\Hp\\AppData\\Local\\Postman\" && deactivate && start Postman.exe && cd \"C:\\Users\\Hp\\AppData\\Local\\Programs\\Microsoft VS Code\" && start Code.exe && start msedge.exe && start cmd.exe",
+      "close": "cd \"C:\\Users\\Hp\\AppData\\Local\\Programs\\Microsoft VS Code\" && deactivate && taskkill /F /IM Code.exe /T && taskkill /F /IM Postman.exe /T && taskkill /F /IM msedge.exe /T && taskkill /F /IM cmd.exe /T"
+    }
+  },
+  {
+    "name": "Microsoft teams",
+    "alias": [
+      "microsoft teams",
+      "teams"
+    ],
+    "location": "C:\\Users\\Hp\\AppData\\Local\\Microsoft\\Teams\\current\\Teams.exe",
+    "scripts": {
+      "open": "cd \"C:\\Users\\Hp\\AppData\\Local\\Microsoft\\Teams\\current\" && start Teams.exe",
+      "close": "cd \"C:\\Users\\Hp\\AppData\\Local\\Microsoft\\Teams\\current\" && taskkill /F /IM \"Teams.exe\" /T"
+    }
+  }
+]

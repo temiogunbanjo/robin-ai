@@ -1,0 +1,55 @@
+MainLayout:
+
+<MainLayout>:
+
+<FileChooser>:
+    # Providing the orientation
+    orientation: 'vertical'
+    spacing: "10dp"
+
+    id: file_chooser
+    file_input_box_widget: file_input_box
+
+    BoxLayout:
+        # Creating list view one side
+        FileChooserListView:
+            on_selection: root.select(*args)
+
+        # Creating Icon view other side
+        FileChooserIconView:
+            canvas.before:
+                Color:
+                    rgb: .5, .4, .5
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            on_selection: root.select(*args)
+
+    # Adding label
+    TextInput:
+        id: file_input_box
+        size_hint_y: .1
+        color: 0, 0, 0
+        hint_text: "Type something here..."
+        canvas.before:
+            Color:
+                rgba: 1, 0.5, 0.5, 0
+            Rectangle:
+                pos: self.pos
+                size: self.size
+    StackLayout:
+        orientation: "rl-tb"
+        spacing: "10dp"
+        size_hint_y: .15
+        padding: "5dp", "5dp"
+
+        Button:
+            text: "Cancel"
+            width: "100dp"
+            size_hint_x: None
+            on_release: root.cancel(app)
+        Button:
+            text: "Select"
+            width: "100dp"
+            size_hint_x: None
+            on_release: root.confirm_select(app)
