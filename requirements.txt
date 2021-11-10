@@ -1,0 +1,6 @@
+Kivy~=2.0.0
+kivymd~=0.104.2
+pytz~=2021.1
+pipe~=1.6.0
+plyer~=2.0.0
+pyttsx3~=2.90

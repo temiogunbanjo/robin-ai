@@ -1,9 +1,7 @@
 import re
 import time
-
 from people_also_ask import get_simple_answer
 from people_also_ask.google import GoogleSearchRequestFailedError
-
 from core.processor import WordProcessor
 from utils.utils import ai_should_proceed_with_action
 

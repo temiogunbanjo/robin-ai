@@ -128,14 +128,13 @@ class WordProcessor:
                 }
             },
             "ai_customisation_requests": {
-                "keywords": ['your name', 'call you'],
+                "keywords": [r'change your (name|voice)'],
                 "examples": [
-                    'your name', r"(what is|what'?s) your name",
+                    'change your name', r"(what is|what'?s) your name",
                     'what are you called', 'name you are called'
                 ],
                 "starters": [
-                    r"(what is|what'?s)", 'tell me', 'give me', 'what should',
-                    r'what do\s+'
+                    r"change your (\w+\s+)(name|voice)"
                 ],
                 "exceptions": None
             },
@@ -149,7 +148,12 @@ class WordProcessor:
                     r'what do\s+'
                 ],
                 "keywords": ['your name', 'call you'],
-                "exceptions": None
+                "exceptions": {
+                    "starters": [
+                        r"how"
+                    ],
+                    "contains": ["change your"]
+                }
             },
             "time_request": {
                 "examples": [
@@ -519,7 +523,7 @@ class WordProcessor:
 # wp = WordProcessor()
 # while stop is False:
 #     phrase = input('Type in a sentence to get its classification: ')
-#     print(wp.resolve_into_equation(phrase))
+#     print(wp.get_classification(phrase))
 #     stop_command = input('Type "stop" to exit or press enter to continue:\n>>>')
 #     print()
 #     if stop_command is 'stop':

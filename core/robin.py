@@ -1,10 +1,10 @@
 import random
 import re
-import threading
 import time
 
 import plyer
 import speech_recognition as sr
+from threading import Thread, current_thread, main_thread
 
 from core.config import Config
 from core.features.calculation_action import calculation_request_handler
@@ -14,7 +14,9 @@ from core.features.info_action import info_request_handler
 from core.features.media_action import media_request_handler
 from core.features.system_action import system_action_handler
 from core.features.time_action import time_request_handler
+from core.features.ai_customization_action import ai_customization_handler
 from core.processor import WordProcessor
+
 from utils.multitask import display_calling_process
 from utils.utils import contains, starts_with, to_capitalize_case
 
@@ -49,6 +51,8 @@ class Robin:
     def set_idle_state(self, idle):
         print(f"setting idle to {idle}")
         self.idle = idle
+        if idle is True:
+            self.execute_ui_action("check_bg_processes_status", idle)
 
     def startup_message(self):
         """ Returns message that would be spoken at start up """
@@ -166,10 +170,11 @@ class Robin:
                 instance.set_idle_state(True)
 
         # Run callback on a different thread to avoid blocking main thread
-        if threading.current_thread() is threading.main_thread():
-            threading.Thread(target=callback, daemon=True, args=(
+        if current_thread() is main_thread():
+            ask_confirmation_thread = Thread(target=callback, daemon=True, args=(
                 self, is_asking_for_confirmation, confirmation_callbacks
-            )).start()
+            ))
+            ask_confirmation_thread.start()
         else:
             callback(self, is_asking_for_confirmation, confirmation_callbacks)
 
@@ -177,6 +182,7 @@ class Robin:
         if message is None:
             message = f'You said, {self.word_processor.transform_speech_to_other_person(command)}. Am I right?'
 
+        print(self.questions)
         # Confirm command
         if len(self.questions) == 0:
             self.talk(message)
@@ -220,20 +226,18 @@ class Robin:
             if 'greetings' in command_classification:
                 results = greetings_handler(instance, command, command_classification)
                 command = results["modified_command"]
-                response_to_command = ". ".join(results["responses"])
+                response_to_command = " ".join(results["responses"])
                 command_classification = results["command_classifications"]
                 has_modified_command = results["has_modified_command"]
 
                 # Respond on a separate thread to avoid blocking current thread
-                threading.Thread(
-                    target=instance.talk, daemon=True,
-                    args=(response_to_command,)
-                ).start()
+                response_thread = Thread(target=instance.talk, daemon=True, args=(response_to_command,))
+                response_thread.start()
                 time.sleep(0.5)
 
-                if len(command_classification) <= 0:
-                    instance.set_idle_state(True)
-                    return
+                # if len(command_classification) <= 0:
+                #     instance.set_idle_state(True)
+                #     return
 
             # Permission request
             if 'permission_request' in command_classification:
@@ -245,11 +249,8 @@ class Robin:
                     found = re.match(starter, command)
                     if found:
                         command = command[found.end():].strip()
+                        has_modified_command = True
                         break
-
-                # if len(command_classification) <= 0:
-                #     instance.set_idle_state(True)
-                #     return
 
             # Gratitude
             if 'gratitude' in command_classification:
@@ -259,6 +260,17 @@ class Robin:
                 if len(command_classification) <= 0:
                     instance.set_idle_state(True)
                     return
+
+            # AI customisation requests
+            if "ai_customisation_requests" in command_classification:
+                results = ai_customization_handler(instance, command, command_classification)
+                command = results["modified_command"]
+                response_to_command = " ".join(results["responses"])
+                has_modified_command = results["has_modified_command"]
+
+                response_thread = Thread(target=instance.talk, daemon=True, args=(response_to_command,))
+                response_thread.start()
+
             # =====[END]====================================================================
 
             # Classify remaining command
@@ -278,27 +290,6 @@ class Robin:
             # AI info requests
             elif 'name_request' in command_classification:
                 instance.talk(f'My name is {instance.config["name"]}')
-
-            # AI customisation requests
-            elif contains(command, ['your voice', 'change your voice']):
-                confirm_voice_change_message = 'Did you ask me to change my voice?'
-
-                def yes_callback(*args):
-                    instance.talk('switching to next voice available...')
-                    index_of_next_voice = int(instance.config['default_voice']) + 1
-                    if index_of_next_voice >= len(instance.config['voices']):
-                        index_of_next_voice = 0
-
-                    # Set new voice
-                    instance.config['default_voice'] = index_of_next_voice
-                    conf.save_config(ai_pref_path)
-
-                    instance.talk(f'Now using voice {index_of_next_voice + 1}')
-
-                def no_callback(robin_instance, cm):
-                    robin_instance.talk('Ok, i thought i heard something else')
-
-                instance.ask_for_confirmation(command, confirm_voice_change_message, yes_callback, no_callback)
 
             # Time requests
             elif 'time_request' in command_classification:
@@ -356,7 +347,6 @@ class Robin:
             else:
                 # Default confirmation callbacks
                 def yes_callback(*args):
-
                     responses_to_give = [
                         "Sadly, I am still unable to fully understand your command for now.",
                         "Uhm, I don't really know how to respond to this kinds of requests yet.",
@@ -389,11 +379,9 @@ class Robin:
             instance.set_idle_state(True)
             # =====[END]====================================================================
 
-        if threading.current_thread() is threading.main_thread():
-            process_thread = threading.Thread(
-                target=callback, daemon=True,
-                args=(self, command, is_asking_for_confirmation, confirmation_callbacks)
-            )
+        if current_thread() is main_thread():
+            process_thread = Thread(target=callback, args=(
+                self, command, is_asking_for_confirmation, confirmation_callbacks), daemon=True)
             process_thread.start()
         else:
             callback(self, command, is_asking_for_confirmation, confirmation_callbacks)
@@ -401,11 +389,12 @@ class Robin:
     def talk(self, text, display_message=True):
         def speak(string_to_speak, ai_instance):
             try:
-                ai_instance.tts_engine = conf.get_tts_engine(voice_index=self.config['default_voice'])
-                ai_instance.tts_engine.say(string_to_speak)
-                ai_instance.tts_engine.runAndWait()
-            except RuntimeError:
-                print(RuntimeError)
+                _tts_engine = conf.get_tts_engine(voice_index=self.config['default_voice'])
+                _tts_engine.say(string_to_speak)
+                _tts_engine.runAndWait()
+            except RuntimeError as ree:
+                print(ree)
+                time.sleep(0.5)
 
         self.set_idle_state(False)
         if display_message:

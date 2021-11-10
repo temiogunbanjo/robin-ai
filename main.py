@@ -192,11 +192,12 @@ class AppUI:
             self.exit()
 
     def initialize_bg_processes(self):
+        global universal_db, bg_listener_thread
         from utils.multitask import MyThread
         from service.robin_bg_service import RobinBackgroundService
         # Start background listener thread
         try:
-            global universal_db, bg_listener_thread
+
             self.robin_instance = Robin(ui=self)
             self.app_bg_instance = AppBgListener(robin_instance=self.robin_instance, ui_instance=self)
             self.robin_background_service = RobinBackgroundService(self.robin_instance, self.app_bg_instance, self)
@@ -204,6 +205,13 @@ class AppUI:
             # Initialize bg listener process
             bg_listener_thread = MyThread(name="bg", callback=self.robin_background_service.run, params=None)
             bg_listener_thread.daemon = True
+        except Exception as ex:
+            print(ex)
+
+    def check_bg_processes_status(self, is_idle):
+        try:
+            global universal_db, bg_listener_thread
+            print("bg_listener_thread is alive:", bg_listener_thread.is_alive())
         except Exception as ex:
             print(ex)
 

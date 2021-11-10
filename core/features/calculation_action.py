@@ -1,8 +1,6 @@
 import re
 from math import sqrt
-
 from pipe import where
-
 from core.processor import WordProcessor
 
 

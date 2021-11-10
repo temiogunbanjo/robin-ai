@@ -1,7 +1,6 @@
 import random
-
 from core.processor import WordProcessor
-from utils.utils import starts_with
+from utils.utils import starts_with, to_capitalize_case
 
 
 def greetings_handler(ai_engine_instance, command, command_classifications=None):
@@ -19,7 +18,7 @@ def greetings_handler(ai_engine_instance, command, command_classifications=None)
         # if command starts with greeting
         if starts_with(original_command, a_greeting):
             if a_greeting in ['hey', 'hi', 'hello']:
-                response_to_command.append(f"{a_greeting} {random.choice(wp.get_affiliations())}!")
+                response_to_command.append(f"{to_capitalize_case(a_greeting)} {random.choice(wp.get_affiliations())}!")
             else:
                 response_to_command.append(response)
             # If additional command exist, continue
@@ -37,7 +36,7 @@ def greetings_handler(ai_engine_instance, command, command_classifications=None)
             has_modified_command = True
 
     for greeting in ["what's up", "what's good", 'howdy', 'how are you', 'how are you doing']:
-        ai_response = f"I'm good and happy {random.choice(wp.get_affiliations())}. Thank you for asking."
+        ai_response = f"I'm good and happy, Thank you for asking."
         remaining_command = process_and_save_response(modified_command, greeting, ai_response)
         # Greeting was found and has been responded to
         if remaining_command is '':
