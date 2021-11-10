@@ -1,8 +1,8 @@
+import os
 import re
+import json
 from math import sqrt
-
 from pipe import where
-
 from utils.utils import contains, starts_with, remove_punctuations
 
 
@@ -238,6 +238,8 @@ class WordProcessor:
                 "exceptions": None
             }
         }
+        self._custom_classifications = None
+
         self.units = [
             'zero', 'one', 'two', 'three', 'four', 'five', 'six',
             'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
@@ -252,6 +254,25 @@ class WordProcessor:
             'hundred', 'thousand', 'million', 'billion', 'trillion', 'quadrillion'
         ]
         self.affiliations = ['friend', 'buddy', 'paddy', 'pal', 'boss']
+        self.load_custom_classifications()
+
+    def load_custom_classifications(self):
+        """
+        Loads all user defined classification rules and adds it to classifications
+        if it exists
+        """
+        path = "../plugins/classifications.json"
+        custom_classifications_exists = os.path.isfile(path)
+        if custom_classifications_exists:
+            with open(path, 'r') as cf:
+                content = cf.read()
+            classifications = json.loads(content)
+            self._custom_classifications = classifications
+            self.classifications = {
+                **self._custom_classifications,
+                **self.classifications
+            }
+            print(self._custom_classifications)
 
     def get_classification(self, sentence):
         """
@@ -519,12 +540,12 @@ class WordProcessor:
         }
 
 # This is how i test this word processor module and classification
-# stop = False
-# wp = WordProcessor()
-# while stop is False:
-#     phrase = input('Type in a sentence to get its classification: ')
-#     print(wp.get_classification(phrase))
-#     stop_command = input('Type "stop" to exit or press enter to continue:\n>>>')
-#     print()
-#     if stop_command is 'stop':
-#         stop = True
+stop = False
+wp = WordProcessor()
+while stop is False:
+    phrase = input('Type in a sentence to get its classification: ')
+    print(wp.get_classification(phrase))
+    stop_command = input('Type "stop" to exit or press enter to continue:\n>>>')
+    print()
+    if stop_command is 'stop':
+        stop = True

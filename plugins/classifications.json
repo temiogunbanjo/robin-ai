@@ -1,0 +1,15 @@
+{
+  "date_request": {
+      "examples": [
+          "what time (is|was) it", "time in",
+          "what says the time", "(what is|what'?s) the time",
+          "say the time", "current time", "what does the time say",
+          "what the time says"
+      ],
+      "starters": [
+          "(what is|what's)", "what says", "tell me", "give me"
+      ],
+      "keywords": ["date", "today"],
+      "exceptions": null
+  }
+}
