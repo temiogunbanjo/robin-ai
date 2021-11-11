@@ -1,11 +1,64 @@
 from datetime import datetime
-
 import pyttsx3 as tts
+from kivy.config import ConfigParser
+
+settings_sections = {
+    "user": {
+        "language": "en-us",
+    },
+    "assistant": {
+        "name": "Robin",
+        "default_voice": 0,
+        "wake_phrase": "hello robin"
+    }
+}
+
+setting_panels = {
+    "User Preferences": [
+        {
+            "type": "title",
+            "title": "Language"
+        },
+        {
+            "type": "options",
+            "title": "Language",
+            "key": "language",
+            "section": "user",
+            "desc": "The language you speak",
+            "options": ["en-us", "en-fr"]
+        }
+    ],
+    "Assistant": [
+        {
+            "type": "title",
+            "title": "Voice Settings"
+        },
+        {
+            "type": "options",
+            "title": "AI Voice",
+            "key": "default_voice",
+            "section": "assistant",
+            "desc": "Voice used by Assistant to speak",
+            "options": ["0", "1"]
+        },
+        {
+            "type": "title",
+            "title": "Settings"
+        },
+        {
+            "type": "string",
+            "title": "Wake up phrase",
+            "key": "wake_phrase",
+            "section": "assistant",
+            "desc": "Size of shape"
+        },
+    ]
+}
 
 
 class Config:
     def __init__(self):
-        self.path = 'core/ai_pref.txt'
+        self.path = 'ai_pref.txt'
         self.default_config = {
             "name": 'robin',
             "language": "en-us",
@@ -13,6 +66,8 @@ class Config:
             "is_first_launch": True,
             "last_launched_at": datetime.now()
         }
+        self.parser = ConfigParser()
+        print(self.parser.read("robin.ini"))
 
     @staticmethod
     def config_exist(path):

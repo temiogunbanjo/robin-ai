@@ -18,7 +18,7 @@ from core.features.ai_customization_action import ai_customization_handler
 from core.processor import WordProcessor
 
 from utils.multitask import display_calling_process
-from utils.utils import contains, starts_with, to_capitalize_case
+from utils.utils import contains, starts_with, to_capitalize_case, remove_list_elements
 
 # TODO: Add a webbrowser python package
 # webbrowser
@@ -261,20 +261,16 @@ class Robin:
                     instance.set_idle_state(True)
                     return
 
-            # AI customisation requests
-            if "ai_customisation_requests" in command_classification:
-                results = ai_customization_handler(instance, command, command_classification)
-                command = results["modified_command"]
-                response_to_command = " ".join(results["responses"])
-                has_modified_command = results["has_modified_command"]
-
-                response_thread = Thread(target=instance.talk, daemon=True, args=(response_to_command,))
-                response_thread.start()
-
             # =====[END]====================================================================
 
             # Classify remaining command
             command_classification = instance.word_processor.get_classification(command)
+
+            # Remove "greeting", "permission", and "gratitude" requests from classification
+            command_classification = remove_list_elements(command_classification, [
+                "greetings", "gratitude", "permission_request"
+            ])
+
             # If the AI doesn't understand the remaining command after being modified, return
             if len(command_classification) == 0 and has_modified_command:
                 instance.set_idle_state(True)
@@ -315,6 +311,11 @@ class Robin:
             elif 'calculation_request' in command_classification:
                 results = calculation_request_handler(instance, command, command_classification)
                 command_classification = results["command_classifications"]
+
+            # AI customisation requests
+            elif "ai_customisation_requests" in command_classification:
+                results = ai_customization_handler(instance, command, command_classification)
+                has_modified_command = results["has_modified_command"]
 
             # Request for info about something
             elif 'info_request' in command_classification:
@@ -411,7 +412,7 @@ class Robin:
         conf.save_config(ai_pref_path, self.config)
 
 
-class AppBgListener:
+class RobinInterface:
     def __init__(self, robin_instance=None, ui_instance=None):
         self.listener = sr.Recognizer()
         self.stop_listen_in_bg = None

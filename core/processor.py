@@ -2,7 +2,7 @@ import os
 import re
 import json
 from math import sqrt
-from pipe import where
+from pipe import where, select
 from utils.utils import contains, starts_with, remove_punctuations
 
 
@@ -266,13 +266,39 @@ class WordProcessor:
         if custom_classifications_exists:
             with open(path, 'r') as cf:
                 content = cf.read()
+
             classifications = json.loads(content)
-            self._custom_classifications = classifications
-            self.classifications = {
-                **self._custom_classifications,
-                **self.classifications
-            }
-            print(self._custom_classifications)
+            if self.validate_custom_classifications(classifications):
+                self._custom_classifications = classifications
+                self.classifications = {
+                    **self._custom_classifications,
+                    **self.classifications
+                }
+                # print(self._custom_classifications)
+            else:
+                raise BaseException("The structure of custom classifications is invalid")
+
+    @staticmethod
+    def validate_custom_classifications(custom_classifications):
+        for classification, rules in custom_classifications.items():
+            if "examples" not in rules or "starters" not in rules or "keywords" not in rules:
+                return False
+            print(rules)
+            for rule_type, rule_list in rules.items():
+                if rule_list is not None:
+                    rule_list = list(
+                        rule_list
+                        | select(lambda p: re.sub(r"\\w", r"\w", p))
+                        | select(lambda p: re.sub(r"\\s", r"\s", p))
+                        | select(lambda p: re.sub(r"\\d", r"\d", p))
+                        | select(lambda p: re.sub(r"\\W", r"\W", p))
+                        | select(lambda p: re.sub(r"\\S", r"\S", p))
+                        | select(lambda p: re.sub(r"\\D", r"\D", p))
+                    )
+                    rules[rule_type] = rule_list
+            print(rules)
+
+        return True
 
     def get_classification(self, sentence):
         """
@@ -540,12 +566,12 @@ class WordProcessor:
         }
 
 # This is how i test this word processor module and classification
-stop = False
-wp = WordProcessor()
-while stop is False:
-    phrase = input('Type in a sentence to get its classification: ')
-    print(wp.get_classification(phrase))
-    stop_command = input('Type "stop" to exit or press enter to continue:\n>>>')
-    print()
-    if stop_command is 'stop':
-        stop = True
+# stop = False
+# wp = WordProcessor()
+# while stop is False:
+#     phrase = input('Type in a sentence to get its classification: ')
+#     print(wp.get_classification(phrase))
+#     stop_command = input('Type "stop" to exit or press enter to continue:\n>>>')
+#     print()
+#     if stop_command is 'stop':
+#         stop = True

@@ -124,6 +124,13 @@ def prefix_list_elements(prefix, list_):
     return list(map(lambda element: f"{prefix}{element}", list_))
 
 
+def remove_list_elements(list_of_items, items_to_remove):
+    for item in items_to_remove:
+        if item in list_of_items:
+            list_of_items.remove(item)
+    return list_of_items
+
+
 def remove_punctuations(sentence):
     """
     Removes all unnecessary punctuations in sentence

@@ -1,3 +1,4 @@
+import json
 import threading
 from multiprocessing import active_children
 
@@ -6,9 +7,11 @@ from kivy.core.text import LabelBase
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.settings import SettingsWithSidebar
 from kivymd.app import MDApp
 
-from core.robin import AppBgListener, Robin
+from core.robin import RobinInterface, Robin
+from core.config import setting_panels, settings_sections
 
 bg_listener_thread = None
 universal_db = {}
@@ -72,7 +75,7 @@ class MainLayout(ScreenManager):
         self.home.save_app_ui_handlers(app_ui_handlers)
 
 
-class RobinUIApp(MDApp):
+class RobinApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         from kivy.core.audio import SoundLoader
@@ -89,10 +92,19 @@ class RobinUIApp(MDApp):
         return self.__class__, ()
 
     def build(self):
+        self.settings_cls = SettingsWithSidebar
         self.root = MainLayout()
         self.root.save_app_ui_handlers(self.app_ui_handlers)
         self.ui_home = self.root.home
         return self.root
+
+    def build_config(self, config):
+        for section, options in settings_sections.items():
+            config.setdefaults(section, options)
+
+    def build_settings(self, settings):
+        for panel, _setting in setting_panels.items():
+            settings.add_json_panel(panel, self.config, data=json.dumps(_setting))
 
     def on_start(self):
         try:
@@ -166,7 +178,7 @@ LabelBase.register(name='Poppins-Bold', fn_regular='resources/fonts/poppins/Popp
 
 class AppUI:
     def __init__(self):
-        self.app_bg_instance = None
+        self.robin_interface_instance = None
         self.robinGUI = None
         self.robin_instance = None
         self.robin_background_service = None
@@ -179,7 +191,7 @@ class AppUI:
             update_universal_db('progress_message', "Initializing BG Processes...")
 
             # Initialize RobinUIApp instance
-            self.robinGUI = RobinUIApp()
+            self.robinGUI = RobinApp()
 
             # Pass AppUI handlers to RobinUIApp instance
             self.robinGUI.save_app_ui_instance_as_handlers(app_ui=self)
@@ -197,10 +209,20 @@ class AppUI:
         from service.robin_bg_service import RobinBackgroundService
         # Start background listener thread
         try:
+            # Initialize Robin core
+            self.robin_instance = Robin(ui=self) if self.robin_instance is None else self.robin_instance
 
-            self.robin_instance = Robin(ui=self)
-            self.app_bg_instance = AppBgListener(robin_instance=self.robin_instance, ui_instance=self)
-            self.robin_background_service = RobinBackgroundService(self.robin_instance, self.app_bg_instance, self)
+            # Initialize Robin core
+            self.robin_interface_instance = RobinInterface(
+                robin_instance=self.robin_instance,
+                ui_instance=self
+            ) if self.robin_interface_instance is None else self.robin_interface_instance
+
+            self.robin_background_service = RobinBackgroundService(
+                self.robin_instance,
+                self.robin_interface_instance,
+                self
+            ) if self.robin_background_service is None else self.robin_background_service
 
             # Initialize bg listener process
             bg_listener_thread = MyThread(name="bg", callback=self.robin_background_service.run, params=None)
@@ -212,6 +234,10 @@ class AppUI:
         try:
             global universal_db, bg_listener_thread
             print("bg_listener_thread is alive:", bg_listener_thread.is_alive())
+            # If listener is not alive, restart listener
+            if not bg_listener_thread.is_alive():
+                self.robin_background_service.should_exit = False
+                self.initialize_bg_processes()
         except Exception as ex:
             print(ex)
 

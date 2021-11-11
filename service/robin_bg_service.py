@@ -10,9 +10,9 @@ from utils.utils import starts_with, contains, ai_should_proceed_with_action, to
 
 
 class RobinBackgroundService:
-    def __init__(self, robin_instance, abl_instance, ui):
+    def __init__(self, robin_instance, robin_interface_instance, ui):
         self.robin = robin_instance
-        self.abl = abl_instance
+        self.robinInterface = robin_interface_instance
         self.ui = ui
         self.sr_daemon = None
         self.first_run = True
@@ -21,7 +21,7 @@ class RobinBackgroundService:
         self.idleness_count = 0
         self.wp = self.robin.word_processor
         self.affiliations = self.wp.get_affiliations()
-        self.__idleness_reminders = [
+        self._idleness_reminders = [
             f"Hey! Did you know I tell funny jokes too? Just say 'hello {self.robin.config['name']}, tell me a joke!'",
             f"Hey there! Did you know i play games too? Just say 'hello {self.robin.config['name']}', lets have fun!",
             f"Did you know i can help you turn on or turn off your computer? "
@@ -167,12 +167,12 @@ class RobinBackgroundService:
             self.idleness_count += 1
             if self.idleness_count > 160 and self.robin is not None:
                 if ai_should_proceed_with_action():
-                    message_index = random.randint(0, len(self.__idleness_reminders) - 1)
+                    message_index = random.randint(0, len(self._idleness_reminders) - 1)
                     notification.notify(
-                        title='Robin Reminder', message=self.__idleness_reminders[message_index],
+                        title='Robin Reminder', message=self._idleness_reminders[message_index],
                         app_name='Robin Virtual Assistant', app_icon='resources/images/Robin.ico', timeout=40
                     )
-                    self.robin.talk(self.__idleness_reminders[message_index])
+                    self.robin.talk(self._idleness_reminders[message_index])
                 self.idleness_count = 0
 
             time.sleep(2)

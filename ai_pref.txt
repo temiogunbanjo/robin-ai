@@ -1,0 +1,5 @@
+name=Robin
+language=en-us
+default_voice=0
+is_first_launch=False
+last_launched_at=2021-11-11 09:11:29.207931
