@@ -87,6 +87,7 @@ class Robin:
         return command
 
     def remember_command(self, command):
+        command = '' if command is None else command
         self.questions.append(command)
 
     def forget_command(self):
@@ -129,7 +130,7 @@ class Robin:
                 command = self.audio_to_text()
                 # Process command
                 instance.display_on_ui(f'[color={instance.green_text_color}]You:[/color] {command}')
-                time.sleep(2)
+                time.sleep(1)
                 instance.process_command(command, is_asking_for_confirmation, confirmation_callbacks)
                 instance.set_idle_state(True)
             except sr.UnknownValueError as unknown_value:
@@ -146,9 +147,11 @@ class Robin:
                         instance.forget_command()
                         if 'i said' in c:
                             what_was_said = c.split('i said')[1]
-                            print(what_was_said)
-                        instance.talk('ok, what did you say?')
-                        instance.listen(True)
+                            instance.process_command(what_was_said)
+                            instance.set_idle_state(True)
+                        else:
+                            instance.talk('ok, what did you say?')
+                            instance.listen(True)
 
                     def no_callback(robin_instance, c):
                         robin_instance.forget_command()
@@ -195,22 +198,28 @@ class Robin:
 
         # Command might be a confirmation
         else:
-            if contains(command, self.word_processor.get_examples('confirmations')):
+            ret_value = None
+            if contains(command, self.word_processor.get_examples('confirmations')) or \
+                    starts_with(command, self.word_processor.get_starters('confirmations')):
                 if yes_callback is not None:
                     yes_callback(self, self.questions[0])
-                return True
-            elif contains(command, self.word_processor.get_examples('disagreements')):
+                ret_value = True
+            elif contains(command, self.word_processor.get_examples('disagreements')) or \
+                    starts_with(command, self.word_processor.get_starters('disagreements')):
                 if no_callback is not None:
                     no_callback(self, self.questions[0])
-                return False
+
+                ret_value = False
             else:
                 self.talk("Sorry, I didn't quite understand that")
-                self.forget_command()
-                return None
+
+            self.forget_command()
+            return ret_value
 
     def process_command(self, command, is_asking_for_confirmation=False, confirmation_callbacks=None):
-        def callback(instance, command, is_asking_for_confirmation, confirmation_callbacks):
 
+        # Thread callback function
+        def callback(instance, command, is_asking_for_confirmation, confirmation_callbacks):
             confirmation_callbacks = {
                 "yes": None, "no": None
             } if confirmation_callbacks is None else confirmation_callbacks
@@ -234,10 +243,6 @@ class Robin:
                 response_thread = Thread(target=instance.talk, daemon=True, args=(response_to_command,))
                 response_thread.start()
                 time.sleep(0.5)
-
-                # if len(command_classification) <= 0:
-                #     instance.set_idle_state(True)
-                #     return
 
             # Permission request
             if 'permission_request' in command_classification:
@@ -371,8 +376,10 @@ class Robin:
                     instance.listen()
 
                 if is_asking_for_confirmation is True:
-                    instance.ask_for_confirmation(command, yes_callback=confirmation_callbacks['yes'],
-                                                  no_callback=confirmation_callbacks['no'])
+                    instance.ask_for_confirmation(
+                        command, yes_callback=confirmation_callbacks['yes'],
+                        no_callback=confirmation_callbacks['no']
+                    )
                 else:
                     instance.ask_for_confirmation(command, yes_callback=yes_callback, no_callback=no_callback)
 
@@ -381,8 +388,10 @@ class Robin:
             # =====[END]====================================================================
 
         if current_thread() is main_thread():
-            process_thread = Thread(target=callback, args=(
-                self, command, is_asking_for_confirmation, confirmation_callbacks), daemon=True)
+            process_thread = Thread(
+                target=callback, daemon=True,
+                args=(self, command, is_asking_for_confirmation, confirmation_callbacks)
+            )
             process_thread.start()
         else:
             callback(self, command, is_asking_for_confirmation, confirmation_callbacks)

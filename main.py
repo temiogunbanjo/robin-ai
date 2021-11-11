@@ -273,14 +273,14 @@ class AppUI:
             if mic_is_pressed:
                 self.robin_instance.idle = False
                 self.robin_background_service.pause_capture(False)
-                self.app_bg_instance.robin_listen_action(ui=self)
+                self.robin_interface_instance.robin_listen_action(ui=self)
                 self.robin_instance.idle = True
             else:
-                self.app_bg_instance.robin_stop_listen_action(ui=self)
+                self.robin_interface_instance.robin_stop_listen_action(ui=self)
                 self.robin_instance.idle = True
 
     def robin_read_action(self, command):
-        self.app_bg_instance.robin_read_action(command, self)
+        self.robin_interface_instance.robin_read_action(command, self)
         self.robin_instance.idle = False
 
     def audio_visualizer_action(self):
